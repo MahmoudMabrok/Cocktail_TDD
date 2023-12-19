@@ -91,35 +91,42 @@ tasks.register("addSpaceToEndOfLines") {
     description = "Add space to the end of each line in .kt files and commit changes to Git"
 
     doLast {
+        project.exec {
+            commandLine("git", "checkout", "-b" , "refactor/submitCode")
+        }
+
         // Set the directory containing Kotlin files
-        val kotlinDir = file("src/main/kotlin")
+        val kotlinDir = file("src/main/")
 
         // Get all .kt files in the directory
         val kotlinFiles = fileTree(kotlinDir).matching { include("**/*.kt") }
 
         // Iterate over each Kotlin file
+        println("processing yo files ${kotlinFiles.files.size}")
+
         for (file in kotlinFiles) {
             // Read the content of the Kotlin file
             val originalContent = file.readText()
 
             // Add a space to the end of each line
-            val modifiedContent = originalContent.replace(Regex("$"), " ")
+            val modifiedContent = originalContent.replace(Regex("$", RegexOption.MULTILINE), " ")
 
             // Write the modified content back to the same file
             file.writeText(modifiedContent)
         }
 
-        // Git commands to add, commit, and push changes
         project.exec {
             commandLine("git", "add", ".")
         }
 
         project.exec {
-            commandLine("git", "commit", "-m", "Add space to end of lines")
+            commandLine("git", "commit", "-m", "refactor: prepare files for code review")
         }
 
         project.exec {
             commandLine("git", "push")
         }
+
+        println("Gradle task 'addSpaceToEndOfLines' completed successfully ")
     }
 }
